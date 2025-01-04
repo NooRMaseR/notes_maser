@@ -1,9 +1,10 @@
+import * as actions from "../utils/storeActions";
 import { useNavigate } from "react-router-dom";
 import { FormEvent, useState } from "react";
 import Form from "../components/form";
 import api from "../utils/api";
 
-export default function Signup() {
+export default function Signup({setHeadState}: {setHeadState: (state: boolean) => void}) {
   const [email, setEmail] = useState<string>("");
   const [errors, setErrors] = useState<string[] | null>(null);
   const navigate = useNavigate();
@@ -17,10 +18,12 @@ export default function Signup() {
         localStorage.setItem("access", response.data.access);
         localStorage.setItem("refresh", response.data.refresh);
         localStorage.setItem("username", name);
+        setHeadState(true);
         navigate("/");
       })
       .catch((error) => {
         setErrors(Object.values<string>(error.response.data));
+        actions.removeState("hasToken");
       });
   };
 
