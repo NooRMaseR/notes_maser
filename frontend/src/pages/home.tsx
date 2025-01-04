@@ -2,9 +2,8 @@ import { useState, useEffect } from "react";
 import { INote } from "../utils/constants";
 import Alert from "../components/aleart";
 import Note from "../components/note";
-import store  from "../utils/store";
 import api from "../utils/api";
-import * as actions from '../utils/storeActions'
+
 
 export default function Home() {
   const [notes, setNotes] = useState<INote[]>([]);
@@ -13,7 +12,7 @@ export default function Home() {
   const [username, setUsername] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [hasError, setHasError] = useState<boolean>(false);
-  store.dispatch(actions.updateState('hasToken', localStorage.getItem('access') !== null))
+  const [hoverdIndex, setHoverdIndex] = useState<number | null>(null);
 
   function showError(errorMessage: unknown) {
     setError(errorMessage as string);
@@ -56,7 +55,7 @@ export default function Home() {
       <div
         className="container d-flex flex-column"
         style={{ width: "100%", height: "100svh" }}
-        >
+      >
         <h1>Welcome {username}</h1>
         {hasError && <Alert message={error} color="danger" />}
         <div className="d-flex flex-column justify-content-center gap-2">
@@ -81,9 +80,26 @@ export default function Home() {
         </div>
         <div>
           <h2>My Notes</h2>
-          {notes.map((note) => (
-            <Note key={note.id} note={note} onDelete={deleteNote} onError={(error) => showError(error)} />
-          ))}
+          
+          <div className="d-flex justify-content-center gap-3 flex-wrap mt-5">
+            {notes.map((note) => (
+              <Note
+                key={note.id}
+                note={note}
+                onDelete={deleteNote}
+                onError={(error) => showError(error)}
+                onMouseEnter={(noteID) => setHoverdIndex(noteID)}
+                onMouseLeave={() => setHoverdIndex(null)}
+                classes={
+                  hoverdIndex === note.id
+                    ? "hoverd"
+                    : hoverdIndex !== null
+                    ? "not-hoverd"
+                    : ""
+                }
+              />
+            ))}
+          </div>
         </div>
       </div>
     </>

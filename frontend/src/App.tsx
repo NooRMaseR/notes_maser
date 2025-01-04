@@ -2,29 +2,27 @@ import {
   BrowserRouter,
   Routes,
   Route,
-  Link,
-  Navigate
+  Link
 } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
 import ProtectedRoute from "./components/protected";
 import "bootstrap/dist/js/bootstrap.bundle.min";
 import "bootstrap/dist/css/bootstrap.min.css";
-// import * as actions from './utils/storeActions';
-import { useState } from "react";
-// import store from "./utils/store";
+import { setHasToken } from "./utils/store";
 
+import Logout from "./pages/logout";
 import Signup from "./pages/signup";
 import Login from "./pages/login";
 import Home from "./pages/home";
-import "./App.css";
+
 
 function App() {
-  const [hasToken, setHasToken] = useState<boolean>(localStorage.getItem('access') !== null);
+  const hasToken = useSelector((state: { hasToken: { value: boolean } }) => state.hasToken.value);
+  const dispatch = useDispatch();
 
-  function Logout() {
+  function handelLogout() {
     localStorage.clear();
-    // setData(actions.updateState('hasToken', false));
-    setHasToken(false);
-    return <Navigate to="/login" />;
+    dispatch(setHasToken(false));
   }
 
   return (
@@ -52,7 +50,7 @@ function App() {
               </>
             ) : (
               <li className="nav-item">
-                <Link to="/logout" className="nav-link">
+                <Link to="/logout" className="nav-link" onClick={handelLogout}>
                   Logout
                 </Link>
               </li>
@@ -70,8 +68,8 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route path="/login" element={<Login setHeadState={setHasToken} />} />
-          <Route path="/register" element={<Signup setHeadState={setHasToken} />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Signup />} />
           <Route path="/logout" element={<Logout />} />
         </Routes>
       </main>

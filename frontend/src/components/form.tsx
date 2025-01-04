@@ -4,7 +4,7 @@ import Error_p from "./error_p";
 
 interface FormProps {
   submitText?: string;
-  onSubmit: (e: FormEvent, name: string, password: string) => void;
+  onSubmit: (e: FormEvent, name: string, password: string) => Promise<void> | void;
   errors?: string[] | null;
   children?: ReactNode;
 }
@@ -17,15 +17,18 @@ export default function Form({submitText = "Submit", onSubmit, errors, children}
   return (
     <div
       className="container d-flex justify-content-center gap-2"
-      style={{ width: "50%", height: "16rem" }}
+      style={{ width: "100%", height: "16rem" }}
     >
       <form
-        onSubmit={(e: FormEvent) => {
+        onSubmit={async (e: FormEvent) => {
           setLoading(true);
-          onSubmit(e, name, password);
-          setLoading(false);
+          try {
+            await onSubmit(e, name, password);
+          } finally {
+            setLoading(false);
+          }
         }}
-        className="form form-control d-flex flex-column justify-content-center gap-3"
+        className="form form-control d-flex flex-column justify-content-center gap-3 text-center"
       >
         <input
           type="text"
@@ -33,6 +36,7 @@ export default function Form({submitText = "Submit", onSubmit, errors, children}
           className="form-control form-input"
           value={name}
           onChange={(e) => setName(e.target.value)}
+          required
         />
         <input
           type="password"
@@ -40,6 +44,7 @@ export default function Form({submitText = "Submit", onSubmit, errors, children}
           className="form-control form-input"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          required
         />
         {children}
         {loading && <Indicator />}

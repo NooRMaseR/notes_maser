@@ -1,0 +1,7 @@
+schemaVersion: 1.0 
+endpoints:
+- name: backend
+  networkVisibilty: Public
+  service:
+     port: 8000
+  type: REST

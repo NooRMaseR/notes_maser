@@ -1,15 +1,26 @@
-import { AxiosError } from "axios";
-import api from "../utils/api";
-import { INote } from "../utils/constants";
 import { useState, useEffect } from "react";
+import { INote } from "../utils/constants";
+import { AxiosError } from "axios";
+import "../styles/note-card.css";
+import api from "../utils/api";
 
 interface NoteProps {
   note: INote;
   onDelete: (id: number) => void;
   onError?: (error: string) => void;
+  onMouseEnter?: (noteId: number) => void;
+  onMouseLeave?: (noteId: number) => void;
+  classes: string;
 }
 
-export default function Note({ note, onDelete, onError }: NoteProps) {
+export default function Note({
+  note,
+  classes,
+  onDelete,
+  onError,
+  onMouseEnter,
+  onMouseLeave,
+}: NoteProps) {
   const [editMode, setEditMode] = useState<boolean>(false);
   const [noteTitle, setNoteTitle] = useState<string>(note.title);
   const [noteContent, setNoteContent] = useState<string>(note.content);
@@ -25,7 +36,10 @@ export default function Note({ note, onDelete, onError }: NoteProps) {
   async function onSave() {
     setEditMode(false);
     try {
-      const response = await api.put(`/notes/${note.id}/`, {title: noteTitle, content: noteContent});
+      const response = await api.put(`/notes/${note.id}/`, {
+        title: noteTitle,
+        content: noteContent,
+      });
       if (response.status === 200) {
         note.title = response.data.title;
         note.content = response.data.content;
@@ -36,9 +50,13 @@ export default function Note({ note, onDelete, onError }: NoteProps) {
     } catch (error) {
       if (onError) {
         if ((error as AxiosError).response?.status === 401) {
-          onError("You are not authorized to update this note, Please Refresh the Page");
+          onError(
+            "You are not authorized to update this note, Please Refresh the Page"
+          );
         } else {
-          onError("An error occurred while updating the note, Please try again later");
+          onError(
+            "An error occurred while updating the note, Please try again later"
+          );
         }
       }
       onCancel();
@@ -46,7 +64,6 @@ export default function Note({ note, onDelete, onError }: NoteProps) {
   }
 
   function onCancel() {
-    // Reset the note title and content
     setEditMode(false);
     setNoteTitle(note.title);
     setNoteContent(note.content);
@@ -79,8 +96,16 @@ export default function Note({ note, onDelete, onError }: NoteProps) {
   }
 
   return (
-    <div className="card mb-3 shadow-sm gap-2">
-      <div className="card-body">
+    <div
+      className={`card mb-3 shadow-sm gap-2 note-card ${classes}`}
+      onMouseEnter={() => {
+        if (onMouseEnter) onMouseEnter(note.id);
+      }}
+      onMouseLeave={() => {
+        if (onMouseLeave) onMouseLeave(note.id);
+      }}
+    >
+      <div className={`card-body ${editMode && 'gap-3 d-flex flex-column'}`}>
         {editMode ? (
           <input
             type="text"
@@ -92,8 +117,7 @@ export default function Note({ note, onDelete, onError }: NoteProps) {
           <h5 className="card-title">{noteTitle}</h5>
         )}
         {editMode ? (
-          <input
-            type="text"
+          <textarea
             className="form-input form-control"
             value={noteContent}
             onChange={(e) => setNoteContent(e.target.value)}
@@ -105,7 +129,9 @@ export default function Note({ note, onDelete, onError }: NoteProps) {
           {new Date(noteUpdated).toLocaleDateString()}
         </p>
       </div>
-      <div className="card-footer d-flex justify-content-center gap-2">{<Buttons />}</div>
+      <div className="card-footer d-flex justify-content-center gap-2">
+        {<Buttons />}
+      </div>
     </div>
   );
 }

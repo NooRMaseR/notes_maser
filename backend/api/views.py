@@ -30,7 +30,6 @@ class NoteApi(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     def put(self, request: Request, id: int) -> Response:
-        print(request.data)
         note = Note.objects.get(author=request.user, id=id)
         serializer = NoteSerializer(note, data=request.data)
         if serializer.is_valid():
@@ -42,20 +41,6 @@ class NoteApi(APIView):
     def delete(self, request: Request, id: int) -> Response:
         Note.objects.get(author=request.user, id=id).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-# class NoteApi(generics.ListCreateAPIView):
-#     serializer_class = NoteSerializer
-    
-#     def get_queryset(self):
-#         print(self.request.headers)
-#         print(self.request.user)
-#         return Note.objects.filter(author=self.request.user)
-    
-#     def perform_create(self, serializer):
-#         if serializer.is_valid():
-#             serializer.save(author=self.request.user)
-        
 
 
 class CreateUserApi(APIView):
@@ -77,7 +62,6 @@ class CreateUserApi(APIView):
         if user is None:
             return Response({"detail": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
         
-        auth.login(request._request, user)
         serializer = UserSerializer(user)
         tokens = self.get_token(user) # type: ignore
         data = serializer.data
@@ -91,7 +75,6 @@ class CreateUserApi(APIView):
         if serializer.is_valid():
             serializer.save()
             user = User.objects.get(username=serializer.data['username']) # type: ignore
-            auth.login(request._request, user)
             
             tokens = self.get_token(user) # type: ignore
             data = serializer.data
